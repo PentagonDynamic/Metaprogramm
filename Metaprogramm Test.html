@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metaprogramm-Profil | Pentagon Dynamic Framework</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f4f0;color:#1a1a1a;min-height:100vh;}
+.wrap{max-width:620px;margin:0 auto;padding:2rem 1.25rem;}
+.card{background:#fff;border-radius:16px;padding:2rem;margin-bottom:1rem;border:1px solid rgba(0,0,0,.07);}
+.progress-bar{height:3px;background:#e8e6e0;border-radius:2px;margin-bottom:2rem;}
+.progress-fill{height:100%;background:#C9A84C;border-radius:2px;transition:width .4s ease;}
+.q-num{font-size:12px;color:#888;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.75rem;}
+.q-text{font-size:17px;font-weight:500;line-height:1.55;margin-bottom:1.75rem;}
+.opt{display:block;width:100%;text-align:left;padding:1rem 1.25rem;margin-bottom:.75rem;border-radius:12px;border:1px solid #e0ddd6;background:#fff;color:#1a1a1a;font-size:15px;line-height:1.5;cursor:pointer;transition:border-color .15s,background .15s;font-family:inherit;}
+.opt:hover{border-color:#C9A84C;background:#fdf9f0;}
+.opt.selected{border:1.5px solid #C9A84C;background:#fdf9f0;}
+.opt-label{font-size:11px;color:#aaa;display:block;margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase;}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.5rem;}
+.btn{padding:.65rem 1.5rem;border-radius:8px;border:1px solid #d0cdc6;background:transparent;color:#1a1a1a;font-size:14px;cursor:pointer;font-family:inherit;transition:background .15s;}
+.btn:hover{background:#f0ede8;}
+.btn-primary{background:#1B2A4A;color:#fff;border-color:#1B2A4A;}
+.btn-primary:hover{background:#243556;}
+.btn:disabled{opacity:.3;cursor:default;}
+.inp{width:100%;padding:.8rem 1rem;border-radius:8px;border:1px solid #d0cdc6;background:#fff;color:#1a1a1a;font-size:15px;font-family:inherit;margin-bottom:1.25rem;outline:none;}
+.inp:focus{border-color:#C9A84C;}
+.badge{display:inline-block;padding:3px 10px;border-radius:6px;background:#f0ede8;border:1px solid #e0ddd6;font-size:12px;color:#666;margin-right:6px;margin-bottom:6px;}
+.divider{height:1px;background:#f0ede8;margin:1.25rem 0;}
+.logo{font-size:12px;color:#aaa;text-align:center;margin-bottom:1.5rem;letter-spacing:.06em;text-transform:uppercase;}
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.75rem;}
+.sum-card{border-radius:10px;padding:1rem;text-align:center;border:1px solid #e0ddd6;background:#f8f6f2;}
+.sum-num{font-size:28px;font-weight:500;display:block;line-height:1;}
+.sum-label{font-size:11px;color:#888;display:block;margin-top:5px;}
+.axis-block{margin-bottom:1.5rem;}
+.axis-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;}
+.axis-pole{font-size:13px;font-weight:500;max-width:44%;}
+.axis-pole.right{text-align:right;}
+.axis-tag{font-size:10px;padding:2px 8px;border-radius:99px;font-weight:500;white-space:nowrap;}
+.axis-track{position:relative;height:6px;background:#f0ede8;border-radius:3px;border:1px solid #e0ddd6;}
+.axis-marker{position:absolute;top:50%;width:16px;height:16px;border-radius:50%;transform:translate(-50%,-50%);border:2.5px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.axis-desc{font-size:12px;color:#666;line-height:1.6;margin-top:.6rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="logo">Pentagon Dynamic Framework</p>
+  <div class="card" id="app"><p style="color:#888;font-size:14px;">Lade...</p></div>
+</div>
+<script>
+const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbx7ewAVzCMHhPxVnkH7fcbPSVZciCeGkdWj_g27fLburvoGRKy680U9NLvhVykyfjNbKQ/exec';
+
+const PAIRS=[
+  {a:'Hin-zu',b:'Weg-von'},{a:'Intern',b:'Extern'},{a:'Options',b:'Procedures'},
+  {a:'Global',b:'Detail'},{a:'Proaktiv',b:'Reaktiv'},{a:'Sameness',b:'Difference'},
+  {a:'Innere Kontrolle',b:'Äußere Kontrolle'},{a:'Aufgaben',b:'Menschen'},
+];
+const DESC=[
+  {a:'Deine Energie kommt aus dem, was du anstrebst. Chancen und Ziele ziehen dich an.',b:'Deine Energie kommt aus dem, was du vermeiden willst. Risiken und Probleme aktivieren dich.',m:'Du hast sowohl Zielorientierung als auch ein feines Gespür für Risiken.'},
+  {a:'Dein wichtigster Maßstab ist dein eigenes Urteil. Du weißt selbst, wann etwas gut ist.',b:'Bestätigung von außen ist für dich wichtig. Feedback anderer gibt dir Orientierung.',m:'Du kombinierst eigenes Urteil mit externem Feedback – je nach Situation.'},
+  {a:'Du denkst in Möglichkeiten. Feste Prozesse engen dich eher ein – du willst Spielraum.',b:'Du arbeitest lieber mit klaren Prozessen. Schritt-für-Schritt-Strukturen geben dir Sicherheit.',m:'Du bewegst dich zwischen Flexibilität und Struktur – abhängig von Aufgabe und Kontext.'},
+  {a:'Du siehst zuerst das Gesamtbild. Details klärst du, wenn die Richtung steht.',b:'Du denkst in konkreten Details. Das Gesamtbild entsteht aus der Summe der Einzelteile.',m:'Du wechselst zwischen Vogelperspektive und Detailfokus – beides liegt dir.'},
+  {a:'Du handelst initiativ. Abwarten kostet dich mehr als ein Fehler – du gehst Dinge an.',b:'Du handelst, wenn du genug Information hast. Überstürztes Handeln ist kein Zeichen von Stärke.',m:'Du erkennst, wann Initiative gefragt ist und wann Abwarten die klügere Wahl ist.'},
+  {a:'Du orientierst dich am Bekannten. Gemeinsamkeiten und Kontinuität geben dir Sicherheit.',b:'Du wirst wach, wenn etwas neu oder anders ist. Unterschiede reizen dich mehr als Gemeinsamkeiten.',m:'Du nimmst sowohl Gemeinsamkeiten als auch Unterschiede wahr – situativ unterschiedlich.'},
+  {a:'Du siehst dich als hauptverantwortlichen Hebel für Ergebnisse. Du übernimmst Kontrolle.',b:'Du erkennst, dass Ergebnisse von vielen Faktoren abhängen – auch außerhalb deiner Kontrolle.',m:'Du übernimmst Verantwortung, erkennst aber auch die Grenzen deines Einflusses.'},
+  {a:'Dein Fokus liegt auf der Aufgabe: Struktur, Plan, Ergebnis.',b:'Dein Fokus liegt auf den Menschen: Beziehungen, Befinden, Dynamik.',m:'Du verbindest Aufgaben- und Menschenorientierung – je nach Situation.'},
+];
+const ALL_Q=[
+  {pair:0,t:'Du planst die nächste Trainingswoche. Was leitet deinen Fokus hauptsächlich?',a:'Welche Stärken wir ausbauen und welche Chancen wir nutzen können.',b:'Welche Schwächen uns Punkte kosten könnten – das will ich verhindern.'},
+  {pair:0,t:'Ein Spieler fragt, warum er jetzt mehr Verantwortung bekommt. Was sagst du zuerst?',a:'Was du dir für seine Entwicklung vorstellst und was möglich ist.',b:'Welche Fehler er abgestellt hat und was er dadurch nicht mehr riskiert.'},
+  {pair:0,t:'Du setzt dir persönliche Ziele für die neue Saison. Welcher Satz trifft eher zu?',a:'Diese Saison will ich den nächsten Entwicklungsschritt als Trainer machen.',b:'Diese Saison will ich nicht wieder in dieselben Fallen tappen wie letzte Saison.'},
+  {pair:0,t:'Du motivierst einen jungen Spieler kurz vor einem wichtigen Spiel. Was sagst du?',a:'Stell dir vor, wie du in 90 Minuten aus diesem Spiel herausgehst – was willst du erreicht haben?',b:'Denk daran, was dich in der Vergangenheit zurückgehalten hat – und lass das heute nicht zu.'},
+  {pair:1,t:'Nach einer erfolgreichen Einheit – woran merkst du, dass es gut war?',a:'Ich spüre es selbst. Ich weiß, was ich beabsichtigt habe und ob es geklappt hat.',b:'Die Reaktionen der Spieler und des Staffs bestätigen mir, dass es gut war.'},
+  {pair:1,t:'Du entwickelst eine neue Spielidee. Was gibt dir die meiste Sicherheit?',a:'Meine eigene fachliche Überzeugung, dass es richtig ist.',b:'Rückmeldungen von Kollegen oder Mentoren, die es bestätigen.'},
+  {pair:1,t:'Du bekommst nach einem Sieg viel Lob vom Vorstand. Was denkst du innerlich?',a:'Nett – aber ich weiß selbst, wo wir noch Probleme haben, die das nicht zeigen.',b:'Das bestätigt mich. Wenn der Vorstand zufrieden ist, haben wir vieles richtig gemacht.'},
+  {pair:1,t:'Du überlegst, ob du deinen Ansatz grundlegend verändern sollst. Was brauchst du dafür?',a:'Zeit für mich – ich muss in Ruhe selbst durchdenken, ob es das Richtige ist.',b:'Gespräche mit erfahrenen Kollegen, die mir Perspektiven von außen geben.'},
+  {pair:2,t:'Dein Team hat ein taktisches Kernproblem. Wie gehst du ran?',a:'Ich probiere mehrere Ansätze aus und schaue, was passt.',b:'Ich folge einem klaren Analyse-Prozess Schritt für Schritt.'},
+  {pair:2,t:'Wie bereitest du dich auf einen schwierigen Gegner vor?',a:'Ich denke mehrere Szenarien durch und halte Optionen offen.',b:'Ich entwickle einen konkreten Spielplan und setze ihn konsequent um.'},
+  {pair:2,t:'Du planst die Vorbereitung auf eine neue Saison. Wie arbeitest du?',a:'Ich skizziere grob die Schwerpunkte und passe Details laufend an.',b:'Ich erstelle einen strukturierten Wochenplan für jede Phase der Vorbereitung.'},
+  {pair:2,t:'Dein Pressing-Konzept funktioniert gegen bestimmte Gegner nicht. Was tust du?',a:'Ich teste verschiedene Varianten – was passiert, wenn wir tiefer stehen, anders anlaufen?',b:'Ich analysiere systematisch die Szenen und erarbeite eine klare, definierte Anpassung.'},
+  {pair:3,t:'Du erklärst deinem Team eine neue Formation. Wie startest du?',a:'Mit dem Gesamtbild – was wir erreichen wollen und warum diese Idee passt.',b:'Mit den konkreten Positionen und Bewegungen jedes einzelnen Spielers.'},
+  {pair:3,t:'Du analysierst eine Niederlage. Was interessiert dich zuerst?',a:'Das große Bild: Warum haben wir strukturell verloren?',b:'Die konkreten Szenen und Fehler, die direkt entscheidend waren.'},
+  {pair:3,t:'Du schaust dir einen potenziellen Neuzugang per Video an. Worauf achtest du zuerst?',a:'Passt dieser Spieler zu unserer Spielidee? Welchen Typ Mensch sehe ich da?',b:'Wie ist sein Zweikampfverhalten, sein Passspiel unter Druck, seine konkreten Stärken?'},
+  {pair:3,t:'Ein Spieler macht Fortschritte, aber langsamer als erwartet. Wie bewertest du das?',a:'Ich schaue, ob er grundsätzlich auf dem richtigen Weg ist – Richtung stimmt, Tempo ist sekundär.',b:'Ich überprüfe konkrete Bereiche – welche Elemente haben sich verbessert, welche nicht?'},
+  {pair:4,t:'Halbzeitpause, es steht 0:1. Was tust du zuerst?',a:'Ich greife direkt ein und mache klare taktische Anpassungen.',b:'Ich höre erst zu – ich will wissen, was die Spieler selbst wahrgenommen haben.'},
+  {pair:4,t:'Im Verein entstehen Gerüchte um einen Leistungsträger. Wie reagierst du?',a:'Ich spreche es aktiv an, bevor es sich ausbreitet.',b:'Ich warte ab, bis sich die Situation konkretisiert – dann handle ich.'},
+  {pair:4,t:'Du merkst, dass zwei Spieler ein unausgesprochenes Problem miteinander haben. Was tust du?',a:'Ich spreche beide separat an – ich will das aus der Welt schaffen, bevor es eskaliert.',b:'Ich beobachte weiter und greife ein, sobald es das Team spürbar beeinflusst.'},
+  {pair:4,t:'Der Verein diskutiert über eine Veränderung in deinem Trainerstab. Was ist dein Ansatz?',a:'Ich positioniere mich frühzeitig und mache meine Erwartungen klar.',b:'Ich warte auf konkrete Entscheidungen – zu früh einzugreifen macht es oft komplizierter.'},
+  {pair:5,t:'Du siehst ein Video über eine neue Trainingsmethode. Was fällt dir zuerst auf?',a:'Wo das mit meinem bisherigen Ansatz übereinstimmt – was mir bekannt vorkommt.',b:'Was neu und anders ist – was ich so noch nicht gemacht habe.'},
+  {pair:5,t:'Ein neuer Spieler kommt ins Team. Woran orientierst du dich bei der Integration?',a:'An dem, was bei anderen Spielern gut funktioniert hat – bewährte Methoden.',b:'Ich schaue genau, was diesen Spieler von allen anderen unterscheidet.'},
+  {pair:5,t:'Du nimmst an einer Trainerfortbildung teil. Was bleibt bei dir hängen?',a:'Bestätigungen für Dinge, die ich schon tue – das gibt mir Sicherheit.',b:'Impulse, die ich noch nicht kannte – Dinge, die ich sofort ausprobieren will.'},
+  {pair:5,t:'Du vergleichst deine Spielidee mit der eines anderen erfolgreichen Trainers. Woran denkst du zuerst?',a:'Wo wir die gleiche Grundphilosophie haben – was unsere Ansätze verbindet.',b:'Wo ich bewusst von ihm abweiche – was ich fundamental anders mache.'},
+  {pair:6,t:'Ihr verliert trotz guter Vorbereitung ein wichtiges Spiel. Was denkst du zuerst?',a:'Was hätte ich als Trainer konkret anders machen können?',b:'Schiedsrichter, Verletzungen, Druck von außen – viele Faktoren haben mitgespielt.'},
+  {pair:6,t:'Ein Spieler entwickelt sich nicht wie erwartet. Wo liegt die Hauptverantwortung?',a:'Ich frage mich, ob mein Coaching-Ansatz für ihn wirklich gepasst hat.',b:'Am Ende entscheidet der Spieler selbst – Wille und Talent liegen bei ihm.'},
+  {pair:6,t:'Ihr gewinnt ein Spiel, das ihr eigentlich verlieren müsstet. Was denkst du danach?',a:'Wir haben in entscheidenden Momenten das Richtige getan – das war kein Zufall.',b:"Manchmal läuft's einfach – Glück, Tagesform, Zufälle gehen in deine Richtung."},
+  {pair:6,t:'Ein Spieler, in den du viel investiert hast, bleibt hinter seinen Möglichkeiten zurück.',a:'Ich frage mich, ob ich den richtigen individuellen Weg gefunden habe.',b:'Irgendwann muss der Spieler selbst den Schalter umlegen – ich kann nur Bedingungen schaffen.'},
+  {pair:7,t:'Du bereitest ein wichtiges Spiel vor. Worauf verwendest du die meiste mentale Energie?',a:'Taktik, Spielsystem, Set-Pieces – der Plan muss sitzen.',b:'Welcher Spieler braucht was – wie ist jeder einzeln gerade drauf?'},
+  {pair:7,t:'Nach einer Trainingseinheit – was beschäftigt dich am meisten?',a:'Hat die Übung das Ziel erreicht? Stimmen Intensität und Qualität?',b:'Wie war die Energie im Team? Wer hat sich wie verhalten?'},
+  {pair:7,t:'Du hast eine freie Stunde vor dem Training. Wie nutzt du sie?',a:'Ich überarbeite den Trainingsplan oder bereite taktische Details vor.',b:'Ich suche das Gespräch mit Spielern oder Staff – informell, ohne Agenda.'},
+  {pair:7,t:'Du musst einen neuen Kapitän wählen. Was gewichtest du am stärksten?',a:'Seine taktische Intelligenz und Verlässlichkeit auf dem Platz.',b:'Wie er mit Mitspielern umgeht und in Konflikten reagiert – er muss Menschen führen.'},
+];
+
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function cat(pA){return pA>=75||pA<=25?'klar':pA>=62||pA<=38?'moderat':'ausgeglichen';}
+const COL={klar:'#C9A84C',moderat:'#1B2A4A',ausgeglichen:'#888780'};
+const BG={klar:'rgba(201,168,76,.1)',moderat:'rgba(27,42,74,.08)',ausgeglichen:'rgba(136,135,128,.08)'};
+
+let S={screen:'intro',name:'',order:[],answers:{},scores:null,cur:0};
+const app=document.getElementById('app');
+
+function render(){
+  if(S.screen==='intro')renderIntro();
+  else if(S.screen==='test')renderQ();
+  else if(S.screen==='result')renderResult();
+}
+
+function renderIntro(){
+  app.innerHTML=`
+    <p style="font-size:22px;font-weight:600;margin-bottom:.5rem;">Metaprogramm-Profil</p>
+    <p style="font-size:15px;color:#666;line-height:1.7;margin-bottom:1.5rem;">32 Situationen aus dem Traineralltag. Wähle jeweils die Aussage, die besser zu dir passt. Kein Richtig oder Falsch – folge deinem ersten Impuls.</p>
+    <div style="margin-bottom:1.5rem;"><span class="badge">~8 Min.</span><span class="badge">32 Fragen</span><span class="badge">8 Dimensionen</span></div>
+    <label style="font-size:14px;color:#666;display:block;margin-bottom:.5rem;">Dein Name</label>
+    <input class="inp" id="nameInp" type="text" placeholder="Vor- und Nachname" value="${S.name}"/>
+    <button class="btn btn-primary" onclick="startTest()" style="width:100%;">Test starten →</button>`;
+}
+
+function startTest(){
+  const n=document.getElementById('nameInp').value.trim();
+  if(!n){alert('Bitte gib deinen Namen ein.');return;}
+  S.name=n;S.order=shuffle([...Array(ALL_Q.length).keys()]);S.answers={};S.cur=0;S.screen='test';render();
+}
+
+function renderQ(){
+  const qi=S.order[S.cur];const q=ALL_Q[qi];const pct=Math.round((S.cur/ALL_Q.length)*100);
+  app.innerHTML=`
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <p class="q-num">Frage ${S.cur+1} von ${ALL_Q.length}</p>
+    <p class="q-text">${q.t}</p>
+    <button class="opt${S.answers[qi]==='a'?' selected':''}" onclick="pick('a')"><span class="opt-label">A</span>${q.a}</button>
+    <button class="opt${S.answers[qi]==='b'?' selected':''}" onclick="pick('b')"><span class="opt-label">B</span>${q.b}</button>
+    <div class="nav">
+      <button class="btn" onclick="goBack()" ${S.cur===0?'disabled':''}>← Zurück</button>
+      <button class="btn btn-primary" onclick="goNext()" ${S.answers[qi]===undefined?'disabled':''}>${S.cur===ALL_Q.length-1?'Auswertung →':'Weiter →'}</button>
+    </div>`;
+}
+
+function pick(v){S.answers[S.order[S.cur]]=v;renderQ();}
+function goBack(){if(S.cur>0){S.cur--;render();}}
+function goNext(){
+  const qi=S.order[S.cur];
+  if(S.answers[qi]===undefined)return;
+  if(S.cur===ALL_Q.length-1){calcAndSend();}else{S.cur++;render();}
+}
+
+function calcScores(){
+  return PAIRS.map((_,pi)=>{
+    let a=0,b=0;
+    ALL_Q.forEach((q,i)=>{if(q.pair===pi){if(S.answers[i]==='a')a++;else if(S.answers[i]==='b')b++;}});
+    return{a,b};
+  });
+}
+
+async function calcAndSend(){
+  S.scores=calcScores();
+  S.screen='result';
+  render();
+  try{
+    const body=new URLSearchParams();
+    body.append('name', S.name);
+    body.append('date', new Date().toLocaleDateString('de-DE'));
+    body.append('scores', JSON.stringify(S.scores));
+    navigator.sendBeacon(WEBHOOK_URL, body);
+  }catch(e){console.log('Webhook error:',e);}
+}
+
+function renderResult(){
+  const processed=S.scores.map((sc,i)=>{
+    const t=sc.a+sc.b,pA=t>0?Math.round((sc.a/t)*100):50,pB=100-pA;
+    const c=cat(pA);const dom=pA>=pB?'a':'b';
+    return{pA,pB,c,dom,pair:PAIRS[i],desc:DESC[i]};
+  });
+  const klar=processed.filter(p=>p.c==='klar').length;
+  const mod=processed.filter(p=>p.c==='moderat').length;
+  const ausg=processed.filter(p=>p.c==='ausgeglichen').length;
+  const sumTxt=klar>=4?'Du hast ein klar ausgeprägtes Profil.':klar>=2?'Dein Profil zeigt klare Präferenzen mit Flexibilität in anderen Bereichen.':'Dein Profil ist insgesamt ausgeglichen – du bist situativ anpassungsfähig.';
+  app.innerHTML=`
+    <p style="font-size:20px;font-weight:600;margin-bottom:.25rem;">Dein Profil, ${S.name.split(' ')[0]}</p>
+    <p style="font-size:13px;color:#888;margin-bottom:1.5rem;">${sumTxt}</p>
+    <div class="summary-grid">
+      <div class="sum-card" style="border-color:${COL.klar};background:${BG.klar};">
+        <span class="sum-num" style="color:${COL.klar};">${klar}</span>
+        <span class="sum-label">Klare Präferenz<br>>75%</span>
+      </div>
+      <div class="sum-card" style="border-color:${COL.moderat};background:${BG.moderat};">
+        <span class="sum-num" style="color:${COL.moderat};">${mod}</span>
+        <span class="sum-label">Moderate Tendenz<br>62–75%</span>
+      </div>
+      <div class="sum-card" style="border-color:${COL.ausgeglichen};background:${BG.ausgeglichen};">
+        <span class="sum-num" style="color:${COL.ausgeglichen};">${ausg}</span>
+        <span class="sum-label">Ausgeglichen<br>38–62%</span>
+      </div>
+    </div>
+    <div class="divider"></div>
+    ${processed.map((p,i)=>{
+      const col=COL[p.c];
+      const tagLabel=p.c==='klar'?'Klar':p.c==='moderat'?'Moderat':'Ausgeglichen';
+      const descTxt=p.c==='ausgeglichen'?p.desc.m:p.dom==='a'?p.desc.a:p.desc.b;
+      return`<div class="axis-block">
+        <div class="axis-header">
+          <span class="axis-pole">${p.pair.a}</span>
+          <span class="axis-tag" style="background:${BG[p.c]};color:${col};border:1px solid ${col};">${tagLabel}</span>
+          <span class="axis-pole right">${p.pair.b}</span>
+        </div>
+        <div class="axis-track">
+          <div class="axis-marker" style="left:${p.pA}%;background:${col};"></div>
+        </div>
+        <p class="axis-desc">${descTxt}</p>
+      </div>${i<processed.length-1?'<div class="divider" style="margin:.75rem 0;"></div>':''}`;
+    }).join('')}
+    <div class="divider"></div>
+    <p style="font-size:11px;color:#bbb;text-align:center;margin-bottom:1.25rem;">Pentagon Dynamic Framework · Georg Dittmann</p>
+    <button class="btn" onclick="S.screen='intro';render()" style="width:100%;">← Neu starten</button>`;
+}
+render();
+</script>
+</body>
+</html>
